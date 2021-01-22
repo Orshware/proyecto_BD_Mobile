@@ -1,8 +1,9 @@
 class Producto {
   String codigo_barras;
-  double precio_venta;
+  String precio_venta;
   String tipo_articulo;
   String nombre;
+  int cantidad;
 
   Producto({this.codigo_barras, this.precio_venta, this.tipo_articulo, this.nombre});
 
