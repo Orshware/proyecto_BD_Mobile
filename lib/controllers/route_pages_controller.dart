@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_BD_Mobile/pages/a%C3%B1adir_producto_venta_page.dart';
 import 'package:proyecto_BD_Mobile/pages/nueva_venta.dart';
 import 'package:proyecto_BD_Mobile/pages/nuevo_cliente_page.dart';
 
@@ -12,6 +13,7 @@ class RoutePagesController {
       '/HomePage': (context) => MyHomePage(title: 'Papeleria',),
       '/AddClient': (context) => AddClientPage(),
       '/AddSale': (context) => AddSalePage(),
+      '/AddProduct': (context) => AddProductPage(),
     };
   }
 }

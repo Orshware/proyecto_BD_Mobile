@@ -14,27 +14,15 @@ class AddSalePage extends StatefulWidget {
 
 class _AddSalePageState extends State<AddSalePage> {
   TextEditingController nombre_cliente;
-  List<Producto> lista_Productos;
+  TextEditingController ap_pat_cliente;
+  TextEditingController ap_mat_cliente;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
-    nombre_cliente = TextEditingController();
-    lista_Productos = List();
-    lista_Productos.add(Producto(
-        codigo_barras: '6464146',
-        precio_venta: 56,
-        tipo_articulo: 'AS',
-        nombre: 'Hojas de Papel'));
-    lista_Productos.add(Producto(
-        codigo_barras: '111111',
-        precio_venta: 588,
-        tipo_articulo: 'dsb',
-        nombre: 'Cuaderno'));
-    lista_Productos.add(Producto(
-        codigo_barras: '222222',
-        precio_venta: 1,
-        tipo_articulo: 'ddd',
-        nombre: 'tijeras'));
+    nombre_cliente = TextEditingController(text: DB.current_cliente.nombre);
+    ap_pat_cliente = TextEditingController(text: DB.current_cliente.ap_pat);
+    ap_mat_cliente = TextEditingController(text: DB.current_cliente.ap_mat);
     // TODO: implement initState
     super.initState();
   }
@@ -42,6 +30,8 @@ class _AddSalePageState extends State<AddSalePage> {
   @override
   void dispose() {
     nombre_cliente.dispose();
+    ap_pat_cliente.dispose();
+    ap_mat_cliente.dispose();
     // TODO: implement dispose
     super.dispose();
   }
@@ -49,6 +39,7 @@ class _AddSalePageState extends State<AddSalePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Nueva Venta'),
       ),
@@ -61,7 +52,7 @@ class _AddSalePageState extends State<AddSalePage> {
                 SizedBox(height: 20),
                 Center(
                   child: Text(
-                    'Datos del Clinete',
+                    'Datos del Cliente',
                     style: TextStyle(
                       color: Colors.blue[500],
                       fontSize: 25,
@@ -72,17 +63,92 @@ class _AddSalePageState extends State<AddSalePage> {
                   controller: nombre_cliente,
                   label: 'Nombre Cliente',
                 ),
+                TextFieldPapeleria(
+                  controller: ap_pat_cliente,
+                  label: 'Apellido Paterno',
+                ),
+                TextFieldPapeleria(
+                  controller: ap_mat_cliente,
+                  label: 'Apellido Materno',
+                ),
                 buildColumnProductos(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+                    color: Colors.blue[100],
+                    child: Row(
+                      children: [
+                        Container(
+                          width: (MediaQuery.of(context).size.width / 2),
+                          child: Text(
+                            'Venta Total',
+                            style: TextStyle(fontSize: 18),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          child: Text(
+                            DB.total_venta(),
+                            style: TextStyle(fontSize: 18),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ),
+                  ),
+                ),
                 RaisedButton(
                   onPressed: () async {
-                    print('Añadir Producto');
+                    DB.current_cliente.nombre = this.nombre_cliente.text;
+                    DB.current_cliente.ap_pat = this.ap_pat_cliente.text;
+                    DB.current_cliente.ap_mat = this.ap_mat_cliente.text;
+                    Navigator.of(context).pushReplacementNamed('/AddProduct');
                   },
                   color: Colors.greenAccent[700],
                   child: Text('Añadir Producto'),
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    print('nueva venta');
+                    bool res_getID = await DB.getCliente(
+                        this.nombre_cliente.text,
+                        this.ap_pat_cliente.text,
+                        this.ap_mat_cliente.text);
+                    if (!res_getID) {
+                      _scaffoldKey.currentState.showSnackBar(SnackBar(
+                        content: Text('Datos del Cliente Invalidos'),
+                        duration: Duration(seconds: 3),
+                      ));
+                    } else {
+                      bool res_create_venta = await DB.createVenta();
+                      if (!res_create_venta) {
+                        _scaffoldKey.currentState.showSnackBar(SnackBar(
+                          content: Text('Error al crear la venta'),
+                          duration: Duration(seconds: 3),
+                        ));
+                      } else {
+                        DB.createCompras();
+                        showDialog(
+                          context: context,
+                          builder: (_) => new AlertDialog(
+                            title: Text('Compra realizada con Exito'),
+                            content: Icon(Icons.shopping_cart),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('Aceptar'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context)
+                                      .popAndPushNamed('/HomePage');
+                                },
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                    }
                   },
                   color: Colors.blue,
                   child: Text('Realizar Venta'),
@@ -96,12 +162,16 @@ class _AddSalePageState extends State<AddSalePage> {
   }
 
   Column buildColumnProductos() {
-    List<Producto_Papeleria> list_Widgets = List();
-    for (Producto prod in lista_Productos) {
-      list_Widgets.add(Producto_Papeleria(
-        nombre: prod.nombre,
-        precio_Venta: prod.precio_venta,
-      ));
+    List<Producto_Papeleria_Desglose> list_Widgets = List();
+    for (Producto prod in DB.list_venta_productos) {
+      list_Widgets.add(
+        Producto_Papeleria_Desglose(
+          nombre: prod.nombre,
+          precio_Venta: prod.precio_venta,
+          onTap: () {},
+          cantidad: prod.cantidad.toString(),
+        ),
+      );
     }
     return Column(
       children: list_Widgets,

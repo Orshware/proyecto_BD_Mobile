@@ -21,6 +21,7 @@ class _AddClientPageState extends State<AddClientPage> {
   TextEditingController calle;
   TextEditingController numero;
   TextEditingController cp;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -58,6 +59,7 @@ class _AddClientPageState extends State<AddClientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Nuevo Cliente'),
       ),
@@ -139,19 +141,52 @@ class _AddClientPageState extends State<AddClientPage> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    var result = await DB.nuevoCliente(
-                      nombre.text,
-                      ap_Pat.text,
-                      ap_Mat.text,
-                      rz_Social.text,
-                      email.text,
-                      estado.text,
-                      colonia.text,
-                      calle.text,
-                      numero.text,
-                      cp.text,
-                    );
-                    print(result);
+                    if (nombre.text != '' &&
+                        ap_Pat.text != '' &&
+                        ap_Mat.text != '' &&
+                        rz_Social.text != '' &&
+                        email.text != '' &&
+                        estado.text != '' &&
+                        colonia.text != '' &&
+                        calle.text != '' &&
+                        numero.text != '' &&
+                        cp.text != '') {
+                      var result = await DB.nuevoCliente(
+                        nombre.text,
+                        ap_Pat.text,
+                        ap_Mat.text,
+                        rz_Social.text,
+                        email.text,
+                        estado.text,
+                        colonia.text,
+                        calle.text,
+                        numero.text,
+                        cp.text,
+                      );
+
+                      showDialog(
+                        context: context,
+                        builder: (_) => new AlertDialog(
+                          title: Text('Registro de Cliente Con Exito'),
+                          content: Icon(Icons.person),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('Aceptar'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context)
+                                    .popAndPushNamed('/HomePage');
+                              },
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
+                      _scaffoldKey.currentState.showSnackBar(SnackBar(
+                        content: Text('Datos Invalidos'),
+                        duration: Duration(seconds: 3),
+                      ));
+                    }
                   },
                   color: Colors.blue,
                   child: Text('Crear'),
