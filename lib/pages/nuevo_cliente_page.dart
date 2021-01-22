@@ -151,7 +151,6 @@ class _AddClientPageState extends State<AddClientPage> {
                         calle.text != '' &&
                         numero.text != '' &&
                         cp.text != '') {
-                      
                       var result = await DB.nuevoCliente(
                         nombre.text,
                         ap_Pat.text,
@@ -164,10 +163,25 @@ class _AddClientPageState extends State<AddClientPage> {
                         numero.text,
                         cp.text,
                       );
-                      
-                      print(result.toJson());
-                    } else {
 
+                      showDialog(
+                        context: context,
+                        builder: (_) => new AlertDialog(
+                          title: Text('Registro de Cliente Con Exito'),
+                          content: Icon(Icons.person),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('Aceptar'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context)
+                                    .popAndPushNamed('/HomePage');
+                              },
+                            )
+                          ],
+                        ),
+                      );
+                    } else {
                       _scaffoldKey.currentState.showSnackBar(SnackBar(
                         content: Text('Datos Invalidos'),
                         duration: Duration(seconds: 3),
