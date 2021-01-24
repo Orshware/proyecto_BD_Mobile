@@ -80,7 +80,7 @@ class _Producto_PapeleriaState extends State<Producto_Papeleria> {
               ),
               actions: <Widget>[
                 FlatButton(
-                  child: Text('Aceptat'),
+                  child: Text('Aceptar'),
                   onPressed: () {
                     if (cantidad.text != '0' &&
                         cantidad.text != '' &&
